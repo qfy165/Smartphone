@@ -26,16 +26,24 @@ def preprocess_data(df):
 
 # Recommend smartphones based on similarity
 def recommend_smartphones(df, user_preferences, features, top_n=5):
-    # Add user preferences as a new row in the dataset
-    user_preferences_scaled = MinMaxScaler().fit_transform([user_preferences])
-    df_with_user = pd.concat([df, pd.DataFrame([user_preferences_scaled], columns=features)], ignore_index=True)
+    # Scale the user preferences using the same MinMaxScaler as the dataframe
+    scaler = MinMaxScaler()
+    scaler.fit(df[features])  # Fit the scaler using the dataframe
+    user_preferences_scaled = scaler.transform([user_preferences])  # Scale user preferences to match the range
     
-    # Compute cosine similarity between user preferences and smartphones
+    # Convert user preferences into a DataFrame with the same structure as the main dataset
+    user_preferences_df = pd.DataFrame(user_preferences_scaled, columns=features)
+    
+    # Concatenate the user's preferences as a new row in the dataframe
+    df_with_user = pd.concat([df, user_preferences_df], ignore_index=True)
+    
+    # Compute cosine similarity between user preferences and all smartphones
     similarity = cosine_similarity(df_with_user[features])
     
     # Get the top N most similar smartphones (excluding the user preference row)
     similar_indices = similarity[-1, :-1].argsort()[-top_n:][::-1]
     
+    # Return the top recommended smartphones
     return df.iloc[similar_indices]
 
 # Streamlit App
