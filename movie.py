@@ -18,11 +18,14 @@ def preprocess_data(df):
     # Fill missing values with the mean
     df[features] = df[features].fillna(df[features].mean())
 
+    # Save the original values for display later
+    df_original = df.copy()
+
     # Normalize the feature values to a range of [0,1] for comparison
     scaler = MinMaxScaler()
     df[features] = scaler.fit_transform(df[features])
     
-    return df, features
+    return df, df_original, features
 
 # Recommend smartphones based on similarity
 def recommend_smartphones(df, user_preferences, features, top_n=5):
@@ -44,7 +47,7 @@ def recommend_smartphones(df, user_preferences, features, top_n=5):
     similar_indices = similarity[-1, :-1].argsort()[-top_n:][::-1]
     
     # Return the top recommended smartphones
-    return df.iloc[similar_indices]
+    return similar_indices
 
 # Streamlit App
 def main():
@@ -52,24 +55,26 @@ def main():
     
     # Load and preprocess the data
     df = load_data()
-    df, features = preprocess_data(df)
+    df_scaled, df_original, features = preprocess_data(df)
 
     # User input: preferences for smartphone features
     st.sidebar.header('Set Your Preferences')
-    price = st.sidebar.slider('Max Price (USD)', min_value=int(df['price'].min()), max_value=int(df['price'].max()), value=500)
+    price = st.sidebar.slider('Max Price (USD)', min_value=int(df_original['price'].min()), max_value=int(df_original['price'].max()), value=500)
     rating = st.sidebar.slider('Min Rating', min_value=0, max_value=100, value=80)
-    battery_capacity = st.sidebar.slider('Min Battery Capacity (mAh)', min_value=int(df['battery_capacity'].min()), max_value=int(df['battery_capacity'].max()), value=4000)
-    ram_capacity = st.sidebar.slider('Min RAM (GB)', min_value=int(df['ram_capacity'].min()), max_value=int(df['ram_capacity'].max()), value=4)
-    internal_memory = st.sidebar.slider('Min Internal Memory (GB)', min_value=int(df['internal_memory'].min()), max_value=int(df['internal_memory'].max()), value=64)
-    screen_size = st.sidebar.slider('Min Screen Size (inches)', min_value=float(df['screen_size'].min()), max_value=float(df['screen_size'].max()), value=5.5)
+    battery_capacity = st.sidebar.slider('Min Battery Capacity (mAh)', min_value=int(df_original['battery_capacity'].min()), max_value=int(df_original['battery_capacity'].max()), value=4000)
+    ram_capacity = st.sidebar.slider('Min RAM (GB)', min_value=int(df_original['ram_capacity'].min()), max_value=int(df_original['ram_capacity'].max()), value=4)
+    internal_memory = st.sidebar.slider('Min Internal Memory (GB)', min_value=int(df_original['internal_memory'].min()), max_value=int(df_original['internal_memory'].max()), value=64)
+    screen_size = st.sidebar.slider('Min Screen Size (inches)', min_value=float(df_original['screen_size'].min()), max_value=float(df_original['screen_size'].max()), value=5.5)
     
     # Store user preferences
     user_preferences = [price, rating, battery_capacity, ram_capacity, internal_memory, screen_size]
     
     # Recommend smartphones
-    recommendations = recommend_smartphones(df, user_preferences, features)
+    similar_indices = recommend_smartphones(df_scaled, user_preferences, features)
     
-    # Display recommendations
+    # Display recommendations with original values
+    recommendations = df_original.iloc[similar_indices]
+    
     st.subheader('Recommended Smartphones for You')
     st.write(recommendations[['brand_name', 'model', 'price', 'rating', 'battery_capacity', 'ram_capacity', 'internal_memory', 'screen_size']])
 
