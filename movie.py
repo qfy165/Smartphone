@@ -11,6 +11,9 @@ def load_data():
 
 # Preprocess the data
 def preprocess_data(df):
+    # Remove 'MYR ' from the price column and convert to numeric
+    df['price'] = df['Price'].str.replace('MYR ', '').str.replace(',', '').astype(float)
+
     # Select numerical columns for similarity computation
     features = ['price', 'rating', 'battery_capacity', 'ram_capacity', 'internal_memory', 'screen_size']
     df[features] = df[features].apply(pd.to_numeric, errors='coerce')  # Convert to numeric
