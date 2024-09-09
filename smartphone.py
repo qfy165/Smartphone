@@ -31,7 +31,7 @@ def preprocess_data(df):
     return df, df_original, features
 
 # Recommend smartphones based on similarity
-def recommend_smartphones(df, user_preferences, features, top_n=5):
+def recommend_smartphones(df, user_preferences, features, top_n=10):
     # Scale the user preferences using the same MinMaxScaler as the dataframe
     scaler = MinMaxScaler()
     scaler.fit(df[features])  # Fit the scaler using the dataframe
