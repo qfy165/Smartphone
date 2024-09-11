@@ -89,5 +89,5 @@ def main():
     st.subheader(f'Recommended Smartphones for Brand: {selected_brand}')
     st.write(recommendations[['brand_name', 'model', 'price', 'rating', 'battery_capacity', 'ram_capacity', 'internal_memory', 'screen_size']])
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     main()
