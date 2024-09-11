@@ -95,11 +95,11 @@ def main():
     # Recommend smartphones
     similar_indices = recommend_smartphones(df_filtered, user_preferences, features, scaler)
     
-    # Display recommendations with original values
+    # Display recommendations with original values, including processor brand
     recommendations = df_original_filtered.iloc[similar_indices]
     
     st.subheader(f'Recommended Smartphones for Brand: {selected_brand} and Processor: {selected_processor}')
-    st.write(recommendations[['brand_name', 'model', 'price', 'rating', 'battery_capacity', 'ram_capacity', 'internal_memory', 'screen_size']])
+    st.write(recommendations[['brand_name', 'model', 'price', 'rating', 'battery_capacity', 'ram_capacity', 'internal_memory', 'screen_size', 'processor_brand']])
 
 if __name__ == "__main__":
     main()
