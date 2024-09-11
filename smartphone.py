@@ -30,6 +30,10 @@ def recommend_smartphones(df, user_preferences, features, scaler, top_n=10):
     df_with_user = pd.concat([df, user_preferences_df], ignore_index=True)
     similarity = cosine_similarity(df_with_user[features])
     similar_indices = similarity[-1, :-1].argsort()[-top_n:][::-1]
+    
+    # Return only valid indices (remove rows where indices exceed DataFrame length)
+    similar_indices = [i for i in similar_indices if i < len(df)]
+    
     return similar_indices
 
 # Streamlit App
@@ -67,8 +71,10 @@ def main():
     
     user_preferences = [price, rating, battery_capacity, ram_capacity, internal_memory, screen_size]
     similar_indices = recommend_smartphones(df_filtered, user_preferences, features, scaler)
+    
+    # Display only non-empty rows based on filtered indices
     recommendations = df_original_filtered.iloc[similar_indices]
-
+    
     st.subheader(f'Recommended Smartphones for Brand: {selected_brand} and Processor: {selected_processor}')
     
     # Display a larger table with customizable width and height, swapping battery capacity and processor brand
