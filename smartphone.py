@@ -4,7 +4,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import MinMaxScaler
 
 # Load the dataset
-@st.cache
+@st.cache_data
 def load_data():
     df = pd.read_csv('smartphone.csv')  # Replace with your file path
     return df
@@ -12,7 +12,7 @@ def load_data():
 # Preprocess the data
 def preprocess_data(df):
     # Remove 'MYR ' from the price column and convert to numeric
-    df['price'] = df['Price'].str.replace('MYR ', '').str.replace(',', '').astype(float)
+    df['price'] = df['Price'].str.replace('MYR ', '', regex=False).str.replace(',', '', regex=False).astype(float)
 
     # Select numerical columns for similarity computation
     features = ['price', 'rating', 'battery_capacity', 'ram_capacity', 'internal_memory', 'screen_size']
@@ -28,13 +28,11 @@ def preprocess_data(df):
     scaler = MinMaxScaler()
     df[features] = scaler.fit_transform(df[features])
     
-    return df, df_original, features
+    return df, df_original, features, scaler
 
 # Recommend smartphones based on similarity
-def recommend_smartphones(df, user_preferences, features, top_n=10):
+def recommend_smartphones(df, user_preferences, features, scaler, top_n=10):
     # Scale the user preferences using the same MinMaxScaler as the dataframe
-    scaler = MinMaxScaler()
-    scaler.fit(df[features])  # Fit the scaler using the dataframe
     user_preferences_scaled = scaler.transform([user_preferences])  # Scale user preferences to match the range
     
     # Convert user preferences into a DataFrame with the same structure as the main dataset
@@ -58,28 +56,38 @@ def main():
     
     # Load and preprocess the data
     df = load_data()
-    df_scaled, df_original, features = preprocess_data(df)
+    df_scaled, df_original, features, scaler = preprocess_data(df)
+
+    # User input: Filter by brand
+    st.sidebar.header('Set Your Preferences')
+    
+    # Dropdown for brand selection
+    brand_list = df_original['brand_name'].unique().tolist()
+    selected_brand = st.sidebar.selectbox('Choose a brand', options=brand_list, index=0)
+    
+    # Filter the dataframe based on selected brand
+    df_filtered = df_scaled[df_original['brand_name'] == selected_brand]
+    df_original_filtered = df_original[df_original['brand_name'] == selected_brand]
 
     # User input: preferences for smartphone features
-    st.sidebar.header('Set Your Preferences')
-    price = st.sidebar.slider('Max Price (MYR)', min_value=int(df_original['price'].min()), max_value=int(df_original['price'].max()), value=1500)
+    price = st.sidebar.slider('Max Price (MYR)', min_value=int(df_original_filtered['price'].min()), max_value=int(df_original_filtered['price'].max()), value=1500)
     rating = st.sidebar.slider('Min Rating', min_value=0, max_value=100, value=80)
-    battery_capacity = st.sidebar.slider('Min Battery Capacity (mAh)', min_value=int(df_original['battery_capacity'].min()), max_value=int(df_original['battery_capacity'].max()), value=4000)
-    ram_capacity = st.sidebar.slider('Min RAM (GB)', min_value=int(df_original['ram_capacity'].min()), max_value=int(df_original['ram_capacity'].max()), value=6)
-    internal_memory = st.sidebar.slider('Min Internal Memory (GB)', min_value=int(df_original['internal_memory'].min()), max_value=int(df_original['internal_memory'].max()), value=128)
-    screen_size = st.sidebar.slider('Min Screen Size (inches)', min_value=float(df_original['screen_size'].min()), max_value=float(df_original['screen_size'].max()), value=6.5)
+    battery_capacity = st.sidebar.slider('Min Battery Capacity (mAh)', min_value=int(df_original_filtered['battery_capacity'].min()), max_value=int(df_original_filtered['battery_capacity'].max()), value=4000)
+    ram_capacity = st.sidebar.slider('Min RAM (GB)', min_value=int(df_original_filtered['ram_capacity'].min()), max_value=int(df_original_filtered['ram_capacity'].max()), value=6)
+    internal_memory = st.sidebar.slider('Min Internal Memory (GB)', min_value=int(df_original_filtered['internal_memory'].min()), max_value=int(df_original_filtered['internal_memory'].max()), value=128)
+    screen_size = st.sidebar.slider('Min Screen Size (inches)', min_value=float(df_original_filtered['screen_size'].min()), max_value=float(df_original_filtered['screen_size'].max()), value=6.5)
     
     # Store user preferences
     user_preferences = [price, rating, battery_capacity, ram_capacity, internal_memory, screen_size]
     
     # Recommend smartphones
-    similar_indices = recommend_smartphones(df_scaled, user_preferences, features)
+    similar_indices = recommend_smartphones(df_filtered, user_preferences, features, scaler)
     
     # Display recommendations with original values
-    recommendations = df_original.iloc[similar_indices]
+    recommendations = df_original_filtered.iloc[similar_indices]
     
-    st.subheader('Recommended Smartphones for You')
+    st.subheader(f'Recommended Smartphones for Brand: {selected_brand}')
     st.write(recommendations[['brand_name', 'model', 'price', 'rating', 'battery_capacity', 'ram_capacity', 'internal_memory', 'screen_size']])
 
-if __name__ == "__main__":
+if _name_ == "_main_":
     main()
