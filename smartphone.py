@@ -71,8 +71,8 @@ def main():
 
     st.subheader(f'Recommended Smartphones for Brand: {selected_brand} and Processor: {selected_processor}')
     
-    # Display a larger table with customizable width and height
-    st.dataframe(recommendations[['brand_name', 'model', 'price', 'rating', 'battery_capacity', 'ram_capacity', 'internal_memory', 'screen_size', 'processor_brand']], height=600, width=1200)
+    # Display a larger table with customizable width and height, swapping battery capacity and processor brand
+    st.dataframe(recommendations[['brand_name', 'model', 'price', 'rating', 'processor_brand', 'battery_capacity', 'ram_capacity', 'internal_memory', 'screen_size']], height=600, width=1200)
 
 if __name__ == "__main__":
     main()
