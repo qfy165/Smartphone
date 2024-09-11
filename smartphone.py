@@ -58,22 +58,34 @@ def main():
     df = load_data()
     df_scaled, df_original, features, scaler = preprocess_data(df)
 
-    # User input: Filter by brand
+    # Sidebar: Filter by smartphone brand
     st.sidebar.header('Set Your Preferences')
     
     # Add "All Brands" option to the brand selection dropdown
     brand_list = ['All Brands'] + df_original['brand_name'].unique().tolist()
-    selected_brand = st.sidebar.selectbox('Choose a brand', options=brand_list, index=0)
+    selected_brand = st.sidebar.selectbox('Choose a smartphone brand', options=brand_list, index=0)
     
-    # Filter the dataframe based on the selected brand (or no filtering for 'All Brands')
+    # Filter the dataframe based on selected smartphone brand
     if selected_brand == 'All Brands':
-        df_filtered = df_scaled
-        df_original_filtered = df_original
+        df_filtered_brand = df_scaled
+        df_original_filtered_brand = df_original
     else:
-        df_filtered = df_scaled[df_original['brand_name'] == selected_brand]
-        df_original_filtered = df_original[df_original['brand_name'] == selected_brand]
+        df_filtered_brand = df_scaled[df_original['brand_name'] == selected_brand]
+        df_original_filtered_brand = df_original[df_original['brand_name'] == selected_brand]
 
-    # User input: preferences for smartphone features
+    # Sidebar: Filter by processor brand
+    processor_list = ['All Processor Brands'] + df_original['processor_brand'].unique().tolist()  # Assuming "processor_brand" is in the dataset
+    selected_processor = st.sidebar.selectbox('Choose a processor brand', options=processor_list, index=0)
+    
+    # Filter the dataframe based on selected processor brand
+    if selected_processor == 'All Processor Brands':
+        df_filtered = df_filtered_brand
+        df_original_filtered = df_original_filtered_brand
+    else:
+        df_filtered = df_filtered_brand[df_original_filtered_brand['processor_brand'] == selected_processor]
+        df_original_filtered = df_original_filtered_brand[df_original_filtered_brand['processor_brand'] == selected_processor]
+
+    # Sidebar: User preferences for smartphone features
     price = st.sidebar.slider('Max Price (MYR)', min_value=int(df_original_filtered['price'].min()), max_value=int(df_original_filtered['price'].max()), value=1500)
     rating = st.sidebar.slider('Min Rating', min_value=0, max_value=100, value=80)
     battery_capacity = st.sidebar.slider('Min Battery Capacity (mAh)', min_value=int(df_original_filtered['battery_capacity'].min()), max_value=int(df_original_filtered['battery_capacity'].max()), value=4000)
@@ -90,8 +102,8 @@ def main():
     # Display recommendations with original values
     recommendations = df_original_filtered.iloc[similar_indices]
     
-    st.subheader(f'Recommended Smartphones for Brand: {selected_brand}')
-    st.write(recommendations[['brand_name', 'model', 'price', 'rating', 'battery_capacity', 'ram_capacity', 'internal_memory', 'screen_size']])
+    st.subheader(f'Recommended Smartphones for Brand: {selected_brand} and Processor: {selected_processor}')
+    st.write(recommendations[['brand_name', 'model', 'processor_brand', 'price', 'rating', 'battery_capacity', 'ram_capacity', 'internal_memory', 'screen_size']])
 
 if __name__ == "__main__":
     main()
