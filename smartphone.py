@@ -61,13 +61,17 @@ def main():
     # User input: Filter by brand
     st.sidebar.header('Set Your Preferences')
     
-    # Dropdown for brand selection
-    brand_list = df_original['brand_name'].unique().tolist()
+    # Add "All Brands" option to the brand selection dropdown
+    brand_list = ['All Brands'] + df_original['brand_name'].unique().tolist()
     selected_brand = st.sidebar.selectbox('Choose a brand', options=brand_list, index=0)
     
-    # Filter the dataframe based on selected brand
-    df_filtered = df_scaled[df_original['brand_name'] == selected_brand]
-    df_original_filtered = df_original[df_original['brand_name'] == selected_brand]
+    # Filter the dataframe based on the selected brand (or no filtering for 'All Brands')
+    if selected_brand == 'All Brands':
+        df_filtered = df_scaled
+        df_original_filtered = df_original
+    else:
+        df_filtered = df_scaled[df_original['brand_name'] == selected_brand]
+        df_original_filtered = df_original[df_original['brand_name'] == selected_brand]
 
     # User input: preferences for smartphone features
     price = st.sidebar.slider('Max Price (MYR)', min_value=int(df_original_filtered['price'].min()), max_value=int(df_original_filtered['price'].max()), value=1500)
