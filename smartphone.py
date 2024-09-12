@@ -61,7 +61,7 @@ def main():
     # Sidebar: User input to filter by brand and processor
     st.sidebar.header('Set Your Preferences')
 
-    with st.form(key='preferences_form'):
+    with st.sidebar.form(key='preferences_form'):
         # Add "Any Brand" option to the brand selection
         brand_list = ['Any Brand'] + df_original['brand_name'].unique().tolist()
         selected_brand = st.selectbox('Choose a brand', options=brand_list, index=0)
