@@ -70,9 +70,9 @@ def recommender_system_1(df_original, df_scaled, features, scaler):
     top_indices = similarity.argsort()[0][-6:-1][::-1]  # Exclude the selected phone
     
     st.write("Other similar phones you might like:")
-    st.write(df_original.iloc[top_indices][['brand_name', 'model', 'price', 'battery_capacity', 
-                                            'ram_capacity', 'internal_memory', 'screen_size', 
-                                            'primary_camera_rear', 'primary_camera_front']])
+    st.write(df_original.iloc[top_indices][['brand_name', 'model', 'price (RM)', 'battery_capacity (mAh)', 
+                                  'processor_brand', 'ram_capacity (GB)', 'internal_memory (GB)', 
+                                  'screen_size (inches)', 'primary_camera_rear (MP)', 'primary_camera_front (MP)']])
 
 # Recommender System 2: Customized preference-based recommendation
 def recommender_system_2(df_original, df_scaled, features, scaler):
@@ -103,7 +103,7 @@ def recommender_system_2(df_original, df_scaled, features, scaler):
 
     # User input: preferences for smartphone features
     with st.sidebar.form(key='preferences_form'):
-        price = st.slider('Max Price (MYR)', min_value=int(df_original['price'].min()), max_value=int(df_original['price'].max()), value=1500)
+        price = st.slider('Max Price (RM)', min_value=int(df_original['price'].min()), max_value=int(df_original['price'].max()), value=1500)
         battery_capacity = st.slider('Min Battery Capacity (mAh)', min_value=int(df_original['battery_capacity'].min()), max_value=int(df_original['battery_capacity'].max()), value=4000)
         ram_capacity = st.slider('Min RAM (GB)', min_value=int(df_original['ram_capacity'].min()), max_value=int(df_original['ram_capacity'].max()), value=6)
         internal_memory = st.slider('Min Internal Memory (GB)', min_value=int(df_original['internal_memory'].min()), max_value=int(df_original['internal_memory'].max()), value=128)
@@ -155,9 +155,9 @@ def recommender_system_2(df_original, df_scaled, features, scaler):
 
         # Display recommendations with original values
         st.subheader(f'Recommended Smartphones for Your Preferences:')
-        st.write(recommendations[['brand_name', 'model', 'price', 'battery_capacity', 
-                                  'processor_brand', 'ram_capacity', 'internal_memory', 
-                                  'screen_size', 'primary_camera_rear', 'primary_camera_front']])
+        st.write(recommendations[['brand_name', 'model', 'price (RM)', 'battery_capacity (mAh)', 
+                                  'processor_brand', 'ram_capacity (GB)', 'internal_memory (GB)', 
+                                  'screen_size (inches)', 'primary_camera_rear (MP)', 'primary_camera_front (MP)']])
 
 # Main function to choose between the recommender systems
 def main():
