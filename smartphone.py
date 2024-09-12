@@ -47,7 +47,7 @@ def recommend_smartphones(df, user_preferences, features, scaler, top_n=10):
     # Get the top N most similar smartphones (excluding the user preference row)
     similar_indices = similarity[-1, :-1].argsort()[-top_n:][::-1]
     
-    # Return the top recommended smartphones
+    # Return the top recommended smartphones' indices
     return similar_indices
 
 # Streamlit App
@@ -119,13 +119,14 @@ def main():
         # Recommend smartphones
         similar_indices = recommend_smartphones(df_filtered, user_preferences, features, scaler)
         
+        # Extract the recommended smartphones from the original dataframe using the indices
+        recommendations = df_original_filtered.iloc[similar_indices]
+        
         # Display recommendations with original values
         st.subheader(f'Recommended Smartphones for Brand: {selected_brand} and Processor: {selected_processor_brand}')
-        st.write(recommendations[['brand_name', 'model', 
-                                  'price', 'battery_capacity', 
-                                  'processor_brand', 'ram_capacity', 
-                                  'internal_memory', 'screen_size', 
-                                  'primary_camera_rear', 'primary_camera_front']])
+        st.write(recommendations[['brand_name', 'model', 'price', 'battery_capacity', 
+                                  'processor_brand', 'ram_capacity', 'internal_memory', 
+                                  'screen_size', 'primary_camera_rear', 'primary_camera_front']])
 
 if __name__ == "__main__":
     main()
