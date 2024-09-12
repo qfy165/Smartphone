@@ -95,5 +95,5 @@ def main():
     # Removed 'rating' from the result display
     st.dataframe(recommendations[['brand_name', 'model', 'price', 'processor_brand', 'battery_capacity', 'ram_capacity', 'internal_memory', 'screen_size']], height=600, width=1200)
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     main()
