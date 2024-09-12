@@ -16,8 +16,8 @@ def load_data():
 def preprocess_data(df):
     df['price'] = df['Price'].str.replace('MYR ', '', regex=False).str.replace(',', '', regex=False).astype(float)
     
-    # Removed 'rating' from the features list
-    features = ['price', 'battery_capacity', 'ram_capacity', 'internal_memory', 'screen_size']
+    # Include front and rear camera in features list
+    features = ['price', 'battery_capacity', 'ram_capacity', 'internal_memory', 'screen_size', 'rear_camera', 'front_camera']
     df[features] = df[features].apply(pd.to_numeric, errors='coerce')  # Convert to numeric
     
     df[features] = df[features].fillna(df[features].mean())
@@ -48,9 +48,11 @@ def main():
 
     st.sidebar.header('Set Your Preferences')
     
+    # Dropdown for brand selection
     brand_list = ['Every Brand'] + df_original['brand_name'].unique().tolist()
     selected_brand = st.sidebar.selectbox('Choose a brand', options=brand_list, index=0)
 
+    # Dropdown for processor brand selection
     processor_list = ['Every Processor'] + df_original['processor_brand'].unique().tolist()
     selected_processor = st.sidebar.selectbox('Choose a processor brand', options=processor_list, index=0)
 
@@ -65,14 +67,43 @@ def main():
         df_filtered = df_filtered[df_original['processor_brand'] == selected_processor]
         df_original_filtered = df_original[df_original['processor_brand'] == selected_processor]
 
+    # User input: preferences for features including front and rear cameras
     price = st.sidebar.slider('Max Price (MYR)', min_value=int(df_original_filtered['price'].min()), max_value=int(df_original_filtered['price'].max()), value=1500)
     battery_capacity = st.sidebar.slider('Min Battery Capacity (mAh)', min_value=int(df_original_filtered['battery_capacity'].min()), max_value=int(df_original_filtered['battery_capacity'].max()), value=4000)
     ram_capacity = st.sidebar.slider('Min RAM (GB)', min_value=int(df_original_filtered['ram_capacity'].min()), max_value=int(df_original_filtered['ram_capacity'].max()), value=6)
     internal_memory = st.sidebar.slider('Min Internal Memory (GB)', min_value=int(df_original_filtered['internal_memory'].min()), max_value=int(df_original_filtered['internal_memory'].max()), value=128)
     screen_size = st.sidebar.slider('Min Screen Size (inches)', min_value=float(df_original_filtered['screen_size'].min()), max_value=float(df_original_filtered['screen_size'].max()), value=6.5)
+
+    # Dropdown for rear and front camera megapixels
+    rear_camera_options = ['Any'] + sorted(df_original_filtered['rear_camera'].dropna().unique().tolist())
+    selected_rear_camera = st.sidebar.selectbox('Min Rear Camera (MP)', options=rear_camera_options, index=0)
     
-    # Removed 'rating' from user preferences
+    front_camera_options = ['Any'] + sorted(df_original_filtered['front_camera'].dropna().unique().tolist())
+    selected_front_camera = st.sidebar.selectbox('Min Front Camera (MP)', options=front_camera_options, index=0)
+    
+    # Filter the dataframe by selected camera preferences
+    if selected_rear_camera != 'Any':
+        df_filtered = df_filtered[df_original['rear_camera'] >= float(selected_rear_camera)]
+        df_original_filtered = df_original_filtered[df_original_filtered['rear_camera'] >= float(selected_rear_camera)]
+    
+    if selected_front_camera != 'Any':
+        df_filtered = df_filtered[df_original['front_camera'] >= float(selected_front_camera)]
+        df_original_filtered = df_original_filtered[df_original_filtered['front_camera'] >= float(selected_front_camera)]
+    
+    # Store user preferences
     user_preferences = [price, battery_capacity, ram_capacity, internal_memory, screen_size]
+    
+    # Add rear and front camera to user preferences if they are not 'Any'
+    if selected_rear_camera != 'Any':
+        user_preferences.append(float(selected_rear_camera))
+    else:
+        user_preferences.append(df_original_filtered['rear_camera'].mean())
+    
+    if selected_front_camera != 'Any':
+        user_preferences.append(float(selected_front_camera))
+    else:
+        user_preferences.append(df_original_filtered['front_camera'].mean())
+    
     similar_indices = recommend_smartphones(df_filtered, user_preferences, features, scaler)
     
     # Display only non-empty rows based on filtered indices
@@ -80,8 +111,8 @@ def main():
     
     st.subheader(f'Recommended Smartphones for Brand: {selected_brand} and Processor: {selected_processor}')
     
-    # Removed 'rating' from the result display
-    st.dataframe(recommendations[['brand_name', 'model', 'price', 'processor_brand', 'battery_capacity', 'ram_capacity', 'internal_memory', 'screen_size']], height=600, width=1200)
+    # Display front and rear camera in the result
+    st.dataframe(recommendations[['brand_name', 'model', 'price', 'processor_brand', 'battery_capacity', 'ram_capacity', 'internal_memory', 'screen_size', 'rear_camera', 'front_camera']], height=600, width=1200)
 
 if __name__ == "__main__":
     main()
