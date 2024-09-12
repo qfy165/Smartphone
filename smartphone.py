@@ -50,13 +50,33 @@ def recommend_smartphones(df, user_preferences, features, scaler, top_n=10):
     # Return the top recommended smartphones' indices
     return similar_indices
 
-# Streamlit App
-def main():
-    st.title('Smartphone Recommender System')
+# Recommender System 1: Recommend similar phones based on user selection
+def recommender_system_1(df_original, df_scaled, features, scaler):
+    st.subheader('Recommender System 1: Select a Phone')
     
-    # Load and preprocess the data
-    df = load_data()
-    df_scaled, df_original, features, scaler = preprocess_data(df)
+    # Let the user select a phone
+    selected_phone = st.selectbox('Choose a Phone', df_original['model'])
+    
+    # Find the phone in the original dataframe
+    selected_phone_row = df_original[df_original['model'] == selected_phone].iloc[0]
+    
+    # Extract features of the selected phone
+    selected_phone_features = selected_phone_row[features].values.reshape(1, -1)
+    
+    # Calculate similarity with all phones in the dataset
+    similarity = cosine_similarity(selected_phone_features, df_scaled[features])
+    
+    # Get top 5 most similar phones
+    top_indices = similarity.argsort()[0][-6:-1][::-1]  # Exclude the selected phone
+    
+    st.write("Other similar phones you might like:")
+    st.write(df_original.iloc[top_indices][['brand_name', 'model', 'price', 'battery_capacity', 
+                                            'ram_capacity', 'internal_memory', 'screen_size', 
+                                            'primary_camera_rear', 'primary_camera_front']])
+
+# Recommender System 2: Customized preference-based recommendation
+def recommender_system_2(df_original, df_scaled, features, scaler):
+    st.subheader('Recommender System 2: Customize Your Preferences')
 
     # Sidebar: User input to filter by brand and processor
     st.sidebar.header('Set Your Preferences')
@@ -127,6 +147,24 @@ def main():
         st.write(recommendations[['brand_name', 'model', 'price', 'battery_capacity', 
                                   'processor_brand', 'ram_capacity', 'internal_memory', 
                                   'screen_size', 'primary_camera_rear', 'primary_camera_front']])
+
+# Main function to choose between the recommender systems
+def main():
+    st.title('Smartphone Recommender System')
+
+    # Load and preprocess the data
+    df = load_data()
+    df_scaled, df_original, features, scaler = preprocess_data(df)
+
+    # Menu for user to select the recommender system
+    st.sidebar.title('Choose Recommender System')
+    system_choice = st.sidebar.selectbox('Select Recommender System', ['Recommender System 1', 'Recommender System 2'])
+
+    if system_choice == 'Recommender System 1':
+        recommender_system_1(df_original, df_scaled, features, scaler)
+    elif system_choice == 'Recommender System 2':
+        recommender_system_2(df_original, df_scaled, features, scaler)
+
 
 if __name__ == "__main__":
     main()
