@@ -121,7 +121,7 @@ def recommender_system_2(df_original, df_scaled, features, scaler):
 
     # Only recommend smartphones when submit button is pressed
     if submit_button:
-        # Start filtering the dataframe based on selected brand and processor brand
+        # Start filtering the dataframe based on selected brand, processor brand, and max price
         df_filtered = df_original.copy()
 
         if selected_brand != 'Any Brand':
@@ -130,9 +130,12 @@ def recommender_system_2(df_original, df_scaled, features, scaler):
         if selected_processor_brand != 'Any Processor Brand':
             df_filtered = df_filtered[df_filtered['processor_brand'] == selected_processor_brand]
 
+        # Filter based on the max price input by the user
+        df_filtered = df_filtered[df_filtered['price'] <= price]
+
         # If df_filtered is empty after filtering, display a message
         if df_filtered.empty:
-            st.subheader(f'No smartphones found for Brand: {selected_brand} and Processor: {selected_processor_brand}')
+            st.subheader(f'No smartphones found for Brand: {selected_brand}, Processor: {selected_processor_brand}, and Max Price: {price}')
             return
         
         # Recommend smartphones
@@ -143,7 +146,7 @@ def recommender_system_2(df_original, df_scaled, features, scaler):
         recommendations = df_filtered.iloc[similar_indices]
 
         # Display recommendations with original values
-        st.subheader(f'Recommended Smartphones for Brand: {selected_brand} and Processor: {selected_processor_brand}')
+        st.subheader(f'Recommended Smartphones for Brand: {selected_brand}, Processor: {selected_processor_brand}, and Max Price: {price} MYR')
         st.write(recommendations[['brand_name', 'model', 'price', 'battery_capacity', 
                                   'processor_brand', 'ram_capacity', 'internal_memory', 
                                   'screen_size', 'primary_camera_rear', 'primary_camera_front']])
