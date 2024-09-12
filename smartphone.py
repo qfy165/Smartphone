@@ -61,21 +61,31 @@ def main():
     # User input: Filter by brand
     st.sidebar.header('Set Your Preferences')
     
-    # Dropdown for brand selection
-    brand_list = df_original['brand_name'].unique().tolist()
+    # Add "Any Brand" option to the brand selection
+    brand_list = ['Any Brand'] + df_original['brand_name'].unique().tolist()
     selected_brand = st.sidebar.selectbox('Choose a brand', options=brand_list, index=0)
     
     # Filter the dataframe based on selected brand
-    df_filtered = df_scaled[df_original['brand_name'] == selected_brand]
-    df_original_filtered = df_original[df_original['brand_name'] == selected_brand]
+    if selected_brand != 'Any Brand':
+        df_filtered = df_scaled[df_original['brand_name'] == selected_brand]
+        df_original_filtered = df_original[df_original['brand_name'] == selected_brand]
+    else:
+        df_filtered = df_scaled
+        df_original_filtered = df_original
 
     # Processor brand options based on the selected smartphone brand
-    processor_list = df_original_filtered['processor_brand'].unique().tolist()
-    selected_processor_brand = st.sidebar.selectbox('Choose a Processor Brand', options=processor_list, index=0)
+    if selected_brand == 'Any Brand':
+        processor_list = df_original['processor_brand'].unique().tolist()  # Show all processor brands if "Any Brand" selected
+    else:
+        processor_list = ['Any Processor Brand'] + df_original_filtered['processor_brand'].unique().tolist()
 
-    # Further filter the dataframe based on selected processor brand
-    df_filtered = df_filtered[df_original_filtered['processor_brand'] == selected_processor_brand]
-    df_original_filtered = df_original_filtered[df_original_filtered['processor_brand'] == selected_processor_brand]
+    # Processor brand selection
+    selected_processor_brand = st.sidebar.selectbox('Choose a Processor Brand', options=processor_list, index=0)
+    
+    # Filter by processor brand unless "Any Processor Brand" is selected
+    if selected_processor_brand != 'Any Processor Brand':
+        df_filtered = df_filtered[df_original_filtered['processor_brand'] == selected_processor_brand]
+        df_original_filtered = df_original_filtered[df_original_filtered['processor_brand'] == selected_processor_brand]
 
     # User input: preferences for smartphone features
     price = st.sidebar.slider('Max Price (MYR)', min_value=int(df_original_filtered['price'].min()), max_value=int(df_original_filtered['price'].max()), value=1500)
