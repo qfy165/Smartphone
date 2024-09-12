@@ -84,9 +84,6 @@ def main():
         filtered_brand_list = df_original[df_original['processor_brand'] == selected_processor_brand]['brand_name'].unique().tolist()
         brand_list_with_any = ['Any Brand'] + filtered_brand_list
 
-    # Display the updated brand selection dropdown after the processor brand is selected
-    selected_brand = st.sidebar.selectbox('Choose a Smartphone Brand (Filtered)', options=brand_list_with_any)
-
     # User input: preferences for smartphone features
     with st.sidebar.form(key='preferences_form'):
         price = st.slider('Max Price (MYR)', min_value=int(df_original['price'].min()), max_value=int(df_original['price'].max()), value=1500)
@@ -123,9 +120,6 @@ def main():
         similar_indices = recommend_smartphones(df_filtered, user_preferences, features, scaler)
         
         # Display recommendations with original values
-        recommendations = df_original_filtered.iloc[similar_indices]
-        
-        # Display result table with units
         st.subheader(f'Recommended Smartphones for Brand: {selected_brand} and Processor: {selected_processor_brand}')
         st.write(recommendations[['brand_name', 'model', 
                                   'price', 'battery_capacity', 
