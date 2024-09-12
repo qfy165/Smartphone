@@ -6,7 +6,7 @@ from sklearn.preprocessing import MinMaxScaler
 # Load the dataset
 @st.cache_data
 def load_data():
-    df = pd.read_csv('/mnt/data/smartphone.csv')  # Replace with your file path
+    df = pd.read_csv('smartphone.csv')  # Replace with your file path
     return df
 
 # Preprocess the data
