@@ -6,13 +6,13 @@ from sklearn.preprocessing import MinMaxScaler
 # Load the dataset
 @st.cache_data
 def load_data():
-    df = pd.read_csv('smartphone.csv')  # Replace with your file path
+    df = pd.read_csv('/mnt/data/smartphone.csv')  # Replace with your file path
     return df
 
 # Preprocess the data
 def preprocess_data(df):
     # Remove 'MYR ' from the price column and convert to numeric
-    df['price'] = df['Price'].str.replace('MYR ', '', regex=False).str.replace(',', '', regex=False).astype(float)
+    df['price'] = df['Price'].str.replace('MYR ', 'RM', regex=False).str.replace(',', '', regex=False).astype(float)
 
     # Select numerical columns for similarity computation
     features = ['price', 'battery_capacity', 'ram_capacity', 'internal_memory', 'screen_size', 'primary_camera_rear', 'primary_camera_front']
@@ -58,9 +58,9 @@ def main():
     df = load_data()
     df_scaled, df_original, features, scaler = preprocess_data(df)
 
-    # User input: Filter by brand
+    # Sidebar input: Set preferences
     st.sidebar.header('Set Your Preferences')
-    
+
     # Add "Any Brand" option to the brand selection
     brand_list = ['Any Brand'] + df_original['brand_name'].unique().tolist()
     selected_brand = st.sidebar.selectbox('Choose a brand', options=brand_list, index=0)
@@ -88,7 +88,7 @@ def main():
         df_original_filtered = df_original_filtered[df_original_filtered['processor_brand'] == selected_processor_brand]
 
     # User input: preferences for smartphone features
-    price = st.sidebar.slider('Max Price (MYR)', min_value=int(df_original_filtered['price'].min()), max_value=int(df_original_filtered['price'].max()), value=1500)
+    price = st.sidebar.slider('Max Price (RM)', min_value=int(df_original_filtered['price'].min()), max_value=int(df_original_filtered['price'].max()), value=1500)
     battery_capacity = st.sidebar.slider('Min Battery Capacity (mAh)', min_value=int(df_original_filtered['battery_capacity'].min()), max_value=int(df_original_filtered['battery_capacity'].max()), value=4000)
     ram_capacity = st.sidebar.slider('Min RAM (GB)', min_value=int(df_original_filtered['ram_capacity'].min()), max_value=int(df_original_filtered['ram_capacity'].max()), value=6)
     internal_memory = st.sidebar.slider('Min Internal Memory (GB)', min_value=int(df_original_filtered['internal_memory'].min()), max_value=int(df_original_filtered['internal_memory'].max()), value=128)
@@ -100,15 +100,28 @@ def main():
 
     # Store user preferences
     user_preferences = [price, battery_capacity, ram_capacity, internal_memory, screen_size, rear_camera, front_camera]
-    
-    # Recommend smartphones
-    similar_indices = recommend_smartphones(df_filtered, user_preferences, features, scaler)
-    
-    # Display recommendations with original values
-    recommendations = df_original_filtered.iloc[similar_indices]
-    
-    st.subheader(f'Recommended Smartphones for Brand: {selected_brand} and Processor: {selected_processor_brand}')
-    st.write(recommendations[['brand_name', 'model', 'price', 'battery_capacity', 'processor_brand', 'ram_capacity', 'internal_memory', 'screen_size', 'primary_camera_rear', 'primary_camera_front']])
+
+    # Add a submit button to confirm the search
+    if st.sidebar.button("Submit"):
+        # Recommend smartphones
+        similar_indices = recommend_smartphones(df_filtered, user_preferences, features, scaler)
+
+        # Display recommendations with original values and units
+        recommendations = df_original_filtered.iloc[similar_indices]
+
+        st.subheader(f'Recommended Smartphones for Brand: {selected_brand} and Processor: {selected_processor_brand}')
+        st.write(recommendations[['brand_name', 'model', 
+                                  'price', 'battery_capacity', 'processor_brand', 
+                                  'ram_capacity', 'internal_memory', 'screen_size', 
+                                  'primary_camera_rear', 'primary_camera_front']].assign(
+                                  price=lambda x: x['price'].apply(lambda p: f'RM {p:.2f}'),
+                                  battery_capacity=lambda x: x['battery_capacity'].apply(lambda b: f'{int(b)} mAh'),
+                                  ram_capacity=lambda x: x['ram_capacity'].apply(lambda r: f'{int(r)} GB'),
+                                  internal_memory=lambda x: x['internal_memory'].apply(lambda m: f'{int(m)} GB'),
+                                  screen_size=lambda x: x['screen_size'].apply(lambda s: f'{s:.1f} inches'),
+                                  primary_camera_rear=lambda x: x['primary_camera_rear'].apply(lambda r: f'{int(r)} MP'),
+                                  primary_camera_front=lambda x: x['primary_camera_front'].apply(lambda f: f'{int(f)} MP')
+                                  ))
 
 if __name__ == "__main__":
     main()
