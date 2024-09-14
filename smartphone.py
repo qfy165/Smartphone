@@ -76,8 +76,8 @@ def recommender_system_1(df_original, df_scaled, features, scaler):
     top_indices = similarity.argsort()[0][-top_n-1:-1][::-1]  # Exclude the selected phone
     
     st.write("Other similar phones you might like:")
-    st.write(df_original.iloc[top_indices][['brand_name', 'model', 'processor_brand', 'price', 
-                                            'battery_capacity', 'ram_capacity', 'internal_memory', 
+    st.write(df_original.iloc[top_indices][['brand_name', 'model', 'price', 
+                                            'battery_capacity', 'processor_brand', 'ram_capacity', 'internal_memory', 
                                             'screen_size', 'primary_camera_rear', 'primary_camera_front']])
     
 # Recommender System 2: Customized preference-based recommendation
