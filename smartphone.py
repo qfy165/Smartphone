@@ -11,6 +11,9 @@ def load_data():
 
 # Preprocess the data
 def preprocess_data(df):
+    # Clean and convert price column
+    df['price'] = df['Price (MYR)'].str.replace('MYR ', '', regex=False).str.replace(',', '', regex=False).astype(float)
+
     # Select numerical columns for similarity computation
     features = [
         'price', 'battery_capacity (mAh)', 'ram_capacity (GB)', 'internal_memory (GB)', 
