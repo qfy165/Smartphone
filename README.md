@@ -1,4 +1,6 @@
-Welcome to the Smartphone Recommender System.
+Welcome to the Smartphone Recommender System! 
+Please view this file in code format.
+
 To run the code:
 1. Upload requirements.txt, smartphone.csv, and smartphone.py to a new GitHub repository
 2. Open streamlit.io and login with your github account
@@ -24,5 +26,5 @@ We discovered that version 1 doesn't work on every device due to this difference
 If the version 1 of the code has errors and is unable to run, using version 2 will most likely solve the issue.
 
 For version 2, just replace the code in line 150 & 151 with this:
-if __name__ == "__main__":
+if _name__ == "__main_":
     main()
