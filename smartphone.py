@@ -11,7 +11,7 @@ def load_data():
 
 # Preprocess the data
 def preprocess_data(df):
-    # Clean and convert price column
+    # Store the price without 'MYR' for calculations
     df['price'] = df['Price (MYR)'].str.replace('MYR ', '', regex=False).str.replace(',', '', regex=False).astype(float)
 
     # Select numerical columns for similarity computation
@@ -64,7 +64,11 @@ def recommender_system_1(df_original, df_scaled, features, scaler):
     top_indices = similarity.argsort()[0][-top_n-1:-1][::-1]
     
     st.write("Other similar phones you might like:")
-    st.write(df_original.iloc[top_indices][['brand_name', 'model', 'price', 'battery_capacity (mAh)',
+    
+    # Format the price to include 'MYR'
+    df_original['price (MYR)'] = 'MYR ' + df_original['price'].round(2).astype(str)
+    
+    st.write(df_original.iloc[top_indices][['brand_name', 'model', 'price (MYR)', 'battery_capacity (mAh)',
                                             'processor_brand', 'ram_capacity (GB)', 'internal_memory (GB)', 
                                             'screen_size (inches)', 'primary_camera_rear (MP)', 'primary_camera_front (MP)']])
 
@@ -127,7 +131,11 @@ def recommender_system_2(df_original, df_scaled, features, scaler):
         recommendations = df_filtered.iloc[similar_indices]
 
         st.subheader('Recommended Smartphones for Your Preferences:')
-        st.write(recommendations[['brand_name', 'model', 'price', 'battery_capacity (mAh)',
+        
+        # Format the price to include 'MYR'
+        df_filtered['price (MYR)'] = 'MYR ' + df_filtered['price'].round(2).astype(str)
+        
+        st.write(recommendations[['brand_name', 'model', 'price (MYR)', 'battery_capacity (mAh)',
                                   'processor_brand', 'ram_capacity (GB)', 'internal_memory (GB)', 
                                   'screen_size (inches)', 'primary_camera_rear (MP)', 'primary_camera_front (MP)']])
 
